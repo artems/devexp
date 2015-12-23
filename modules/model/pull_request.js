@@ -1,5 +1,7 @@
 'use strict';
 
+import { Schema } from 'mongoose';
+
 export function setupSchema() {
   return {
     id: Number,
@@ -61,7 +63,8 @@ export function setupSchema() {
       started_at: Date,
       updated_at: Date,
       completed_at: Date
-    }
+    },
+    section: Schema.Types.Mixed
   };
 }
 
@@ -81,18 +84,17 @@ export function setupModel(modelName, model) {
   });
 
   /**
-   * Find pull requests by user
+   * Find pull requests by owner
    *
    * @param {String} login
    *
    * @return {Promise}
    */
-  model.statics.findByUser = function (login) {
+  model.statics.findByOwner = function (login) {
     return this
       .model(modelName)
       .find({ 'user.login': login })
-      .sort('-updated_at')
-      .exec();
+      .sort('-updated_at');
   };
 
   /**
@@ -106,19 +108,18 @@ export function setupModel(modelName, model) {
     return this
       .model(modelName)
       .find({ 'review.reviewers.login': login })
-      .sort('-updated_at')
-      .exec();
+      .sort('-updated_at');
   };
 
   /**
-   * Find pull request by number and repository
+   * Find pull request by repository and number
    *
-   * @param {Number} number - pull request number
    * @param {String} fullName - repository full name
+   * @param {Number} number - pull request number
    *
    * @return {Promise}
    */
-  model.statics.findByNumberAndRepository = function (number, fullName) {
+  model.statics.findByRepositoryAndNumber = function (fullName, number) {
     return this
       .model(modelName)
       .findOne({ number, 'repository.full_name': fullName });
@@ -130,7 +131,7 @@ export function setupModel(modelName, model) {
    * @param {String} login
    * @return {Promise}
    */
-  model.statics.findOpenReviewsByUser = function (login) {
+  model.statics.findInReviewByReviewer = function (login) {
     const req = {
       state: 'open',
       'review.status': 'inprogress',

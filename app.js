@@ -19,6 +19,9 @@ application
 process.on('SIGINT', () => {
   application
     .shutdown()
+    .then(() => {
+      console.log('');
+    })
     .catch(error => {
       console.error(error.stack ? error.stack : error);
       process.exit(1);
